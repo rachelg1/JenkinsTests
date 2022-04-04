@@ -5,7 +5,7 @@ import groovy.json.JsonSlurper
 
 
 //File projectsFile = new File(build.getEnvVars()["WORKSPACE"] + "/service_dependencies.json")
-String projects_file = readFileFromWorkspace("projects.json")
+String projects_file = readFileFromWorkspace("src/projects.json")
 
 def InputJSON = new JsonSlurper().parseText(projects_file);
 
