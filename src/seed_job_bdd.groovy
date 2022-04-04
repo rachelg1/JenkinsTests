@@ -55,25 +55,6 @@ def createPipeline(service) {
         }
 
         parameters {
-            wHideParameterDefinition{
-                name("SERVICE_NAME")
-                description("service name")
-                defaultValue(service.service_name)
-            }
-            wHideParameterDefinition{
-                name("TEST_TYPE")
-                description("Test type,generally bdd or critical")
-                defaultValue("BDD")
-            }
-            //stringParam("SERVICE_NAME",service.service_name,"")
-            activeChoiceReactiveParam("scenarios"){
-                choiceType("MULTI_SELECT")
-                referencedParameter('SERVICE_NAME')
-                groovyScript {
-                    script(readFileFromWorkspace("jenkins/scripts/get_scenarios_bdd.groovy"))
-
-                }
-            }
             choiceParam('STRATEGY', ['a_b', 'a_b_c'], 'Choose test.groovy strategy')
             stringParam("wait_for_scoring","1","wait time before scoring path")
             stringParam("duration","120","duration time for each scenario fault injection")
