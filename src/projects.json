@@ -1,0 +1,12 @@
+{
+  "projects": [
+    {
+      "service_name": "test123",
+      "group": "test",
+      "enable_alpha": true,
+      "available_hosts": [
+        "localhost"
+      ]
+    }
+  ]
+}
