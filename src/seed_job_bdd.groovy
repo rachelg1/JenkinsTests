@@ -60,12 +60,6 @@ def createPipeline(service) {
             stringParam("duration","120","duration time for each scenario fault injection")
 
             booleanParam('graphite', true, 'send graphite events during test.groovy')
-            wHideParameterDefinition{
-                name("web_layer_metric")
-                description("The service name of the Nginx/we layer if exist")
-                defaultValue(service.web_layer_metric)
-            }
-
         }
     }
 }
