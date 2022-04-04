@@ -45,7 +45,7 @@ def createPipeline(service) {
     def newJobName = "${service.service_name}_bdd_resilience"
 
     pipelineJob(newJobName) {
-        description("BDD test for ${service.service_name} based on feature file")
+        description("BDD test.groovy for ${service.service_name} based on feature file")
 
         definition {
             cps {
@@ -74,11 +74,11 @@ def createPipeline(service) {
 
                 }
             }
-            choiceParam('STRATEGY', ['a_b', 'a_b_c'], 'Choose test strategy')
+            choiceParam('STRATEGY', ['a_b', 'a_b_c'], 'Choose test.groovy strategy')
             stringParam("wait_for_scoring","1","wait time before scoring path")
             stringParam("duration","120","duration time for each scenario fault injection")
 
-            booleanParam('graphite', true, 'send graphite events during test')
+            booleanParam('graphite', true, 'send graphite events during test.groovy')
             wHideParameterDefinition{
                 name("web_layer_metric")
                 description("The service name of the Nginx/we layer if exist")
