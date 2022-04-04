@@ -49,7 +49,7 @@ def createPipeline(service) {
 
         definition {
             cps {
-                script(readFileFromWorkspace('jenkins/creator/main_pipeline.groovy'))
+                script(readFileFromWorkspace('src/main_pipeline.groovy'))
 
             }
         }
