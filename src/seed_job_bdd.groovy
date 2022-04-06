@@ -2,6 +2,7 @@ import hudson.model.*
 import groovy.io.FileType
 import hudson.security.*
 import groovy.json.JsonSlurper
+import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval
 
 
 //File projectsFile = new File(build.getEnvVars()["WORKSPACE"] + "/service_dependencies.json")
@@ -19,6 +20,10 @@ InputJSON.projects.each {
 }
 //finally - add to view
 addToView()
+ScriptApproval scriptApproval = ScriptApproval.get()
+scriptApproval.pendingScripts.each {
+    scriptApproval.approveScript(it.hash)
+}
 
 def addToView(){
     listView('ABC_TEST') {
