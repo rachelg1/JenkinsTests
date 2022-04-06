@@ -47,7 +47,7 @@ def addToView(){
 
 def createPipeline(service) {
 
-    def newJobName = "${service.service_name}_bdd_resilience"
+    def newJobName = "${service.service_name}_test"
 
     pipelineJob(newJobName) {
         description("BDD test.groovy for ${service.service_name} based on feature file")
