@@ -21,7 +21,7 @@ InputJSON.projects.each {
 addToView()
 
 def addToView(){
-    listView('BDD_RESILIENCE') {
+    listView('ABC_TEST') {
         description('All feature files bdd resilience jobs ')
         filterBuildQueue()
         filterExecutors()
