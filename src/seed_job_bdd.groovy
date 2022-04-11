@@ -66,5 +66,9 @@ def createPipeline(service) {
 
             booleanParam('graphite', true, 'send graphite events during test.groovy')
         }
+        
+         triggers {
+        cron('H */4 * * 1-5')
+    }
     }
 }
