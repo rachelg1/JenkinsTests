@@ -50,25 +50,26 @@ def createPipeline(service) {
     def newJobName = "${service.service_name}_test"
 
     pipelineJob(newJobName) {
-        properties {
-            description("BDD test.groovy for ${service.service_name} based on feature file")
 
-            definition {
-                cps {
-                    script(readFileFromWorkspace('src/main_pipeline.groovy'))
+        description("BDD test.groovy for ${service.service_name} based on feature file")
 
-                }
+        definition {
+            cps {
+                script(readFileFromWorkspace('src/main_pipeline.groovy'))
+
             }
+        }
 
-            parameters {
-                choiceParam('STRATEGY', ['a_b', 'a_b_c'], 'Choose test.groovy strategy')
-                stringParam("wait_for_scoring", "1", "wait time before scoring path")
-                stringParam("duration", "120", "duration time for each scenario fault injection")
+        parameters {
+            choiceParam('STRATEGY', ['a_b', 'a_b_c'], 'Choose test.groovy strategy')
+            stringParam("wait_for_scoring", "1", "wait time before scoring path")
+            stringParam("duration", "120", "duration time for each scenario fault injection")
 
-                booleanParam('graphite', true, 'send graphite events during test.groovy')
-            }
+            booleanParam('graphite', true, 'send graphite events during test.groovy')
+        }
 
-            if (service.daily_build != null && service.daily_build.enable == true)
+        if (service.daily_build != null && service.daily_build.enable == true)
+            properties {
                 pipelineTroggers {
                     triggers {
                         cron {
@@ -76,6 +77,6 @@ def createPipeline(service) {
                         }
                     }
                 }
-        }
+            }
     }
 }
