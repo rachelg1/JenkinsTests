@@ -25,7 +25,7 @@ scriptApproval.pendingScripts.each {
     scriptApproval.approveScript(it.hash)
 }
 
-def addToView(){
+def addToView() {
     listView('ABC_TEST') {
         description('All feature files bdd resilience jobs ')
         filterBuildQueue()
@@ -61,14 +61,15 @@ def createPipeline(service) {
 
         parameters {
             choiceParam('STRATEGY', ['a_b', 'a_b_c'], 'Choose test.groovy strategy')
-            stringParam("wait_for_scoring","1","wait time before scoring path")
-            stringParam("duration","120","duration time for each scenario fault injection")
+            stringParam("wait_for_scoring", "1", "wait time before scoring path")
+            stringParam("duration", "120", "duration time for each scenario fault injection")
 
             booleanParam('graphite', true, 'send graphite events during test.groovy')
         }
-        
-         triggers {
-        cron('H 20 * * *')
-    }
+
+        if (service.daily_build.enable == true)
+            triggers {
+                cron('H ' + service.daily_build.time + ' * * *')
+            }
     }
 }

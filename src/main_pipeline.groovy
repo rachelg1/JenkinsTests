@@ -1,90 +1,83 @@
-def String A_END=""
-def String  A_START=""
-def String  template_file=""
+def String A_END = ""
+def String A_START = ""
+def String template_file = ""
 
-def A_DURATION=3
-node {  
-    deleteDir() 
+def A_DURATION = 3
+node {
+    deleteDir()
     //def buildStatus = "SUCCESS"
     git branch: 'main', url: 'https://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@github.com/rachelg1/Test.git'
     def currentStage = "";
     println env.scenarios
-    def String[] scenarios_arr 
-    A_END=System.currentTimeSeconds()
-    A_START=System.currentTimeSeconds() - (A_DURATION*60)
+    def String[] scenarios_arr
+    A_END = System.currentTimeSeconds()
+    A_START = System.currentTimeSeconds() - (A_DURATION * 60)
     scenarios_arr = env.scenarios.split(',')
     scenarios_arr.each { entry ->
-    try{
-    catchError(message: "scenario : $entry - failed", buildResult: 'FAILURE', stageResult: 'FAILURE'){
-        stage (entry) {
-            timestamps{
-                echo "$entry"
-                currentStage=entry;
-                if(TEST_TYPE=="BDD"){
-                    runBehaveBDD(currentStage,A_START,A_END)
+        try {
+            catchError(message: "scenario : $entry - failed", buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                stage(entry) {
+                    timestamps {
+                        echo "$entry"
+                        currentStage = entry;
+                        if (TEST_TYPE == "BDD") {
+                            runBehaveBDD(currentStage, A_START, A_END)
+                        } else if (TEST_TYPE == "CRITICAL") {
+                            template_file = (internal_user == 'appuser') ? 'test_template_appuser.txt ' : 'test_template.txt'
+                            runBehaveCritical(currentStage, A_START, A_END, template_file)
+                        } else {
+                            echo "missing TEST_TYPE for this run,exit.."
+                            currentBuild.result = 'FAILURE'
+                            return
+                        }
+                        //runBehaveCritical(currentStage,A_START,A_END)
+                        /**try{echo "$entry"
+                         runBehave(entry)} catch(err){echo "build failed or not"
+                         echo "Caught: ${err}"
+                         //currentBuild.result = 'FAILURE'
+                         buildStatus = 'FAILURE'}**/
+                    }
                 }
-                else if (TEST_TYPE=="CRITICAL"){
-                    template_file =  (internal_user == 'appuser')  ? 'test_template_appuser.txt ' : 'test_template.txt'
-                    runBehaveCritical(currentStage,A_START,A_END,template_file)
-                }
-                else{
-                echo "missing TEST_TYPE for this run,exit.."
-                currentBuild.result = 'FAILURE'
-                return
-                }
-                //runBehaveCritical(currentStage,A_START,A_END)
-                /**try{
-                echo "$entry"
-                runBehave(entry)
-                } catch(err){
-                    echo "build failed or not"
-                    echo "Caught: ${err}"
-                    //currentBuild.result = 'FAILURE'
-                    buildStatus = 'FAILURE'
-                }**/
+            }
+        } catch (e) {
+            echo 'This will run only if failed'
+
+            // Since we're catching the exception in order to report on it,
+            // we need to re-throw it, to ensure that the build is marked as failed
+            throw e
+        } finally {
+            def currentResult = currentBuild.result ?: 'SUCCESS'
+            def slackColor = (currentResult == 'SUCCESS') ? "#0fab65" : "#7d243a";
+            wrap([$class: 'BuildUser']) {
+
+
+                //slackSend channel: "@"+env.BUILD_USER_ID+",nft", message: "Hey - here is your critical dependencies tests results (<${env.BUILD_URL}|Open>) ", tokenCredentialId: 'slack-secret'
+                slackSend channel: "@" + env.BUILD_USER_ID + ",nft", message: "${env.JOB_NAME} #${env.BUILD_NUMBER} completed as ${currentResult}  ${env.JOB_NAME}, click here to view (<${env.BUILD_URL}|Open>)", tokenCredentialId: 'slack-secret ', color: slackColor
             }
         }
-    }
-    } catch (e) {
-        echo 'This will run only if failed'
 
-        // Since we're catching the exception in order to report on it,
-        // we need to re-throw it, to ensure that the build is marked as failed
-        throw e
-    } finally {
-        def currentResult = currentBuild.result ?: 'SUCCESS'
-        def slackColor = (currentResult == 'SUCCESS') ? "#0fab65" : "#7d243a" ;
-         wrap([$class: 'BuildUser']) {
-
-    
-    //slackSend channel: "@"+env.BUILD_USER_ID+",nft", message: "Hey - here is your critical dependencies tests results (<${env.BUILD_URL}|Open>) ", tokenCredentialId: 'slack-secret'
-    slackSend channel: "@"+env.BUILD_USER_ID+",nft", message: "${env.JOB_NAME} #${env.BUILD_NUMBER} completed as ${currentResult}  ${env.JOB_NAME}, click here to view (<${env.BUILD_URL}|Open>)", tokenCredentialId: 'slack-secret ',color: slackColor
-}
-}
-        
     }
-        
+
     //currentBuild.result = "SUCCESS"
     //echo BUILD_USER_ID
-    
-   
-    
+
+
 }
 
 @NonCPS
-def runBehaveCritical(scenario,A_START,A_END,template_file){
+def runBehaveCritical(scenario, A_START, A_END, template_file) {
     sh '''set +x
     
     echo "set up variable for the shell  "
-    graphite="'''+graphite+'''"
-    scenario="'''+scenario+'''"
-    duration="'''+duration+'''"
-    template_file="'''+template_file+'''"
+    graphite="''' + graphite + '''"
+    scenario="''' + scenario + '''"
+    duration="''' + duration + '''"
+    template_file="''' + template_file + '''"
 
 pip3 install -r requirements.txt --no-index --find-links \'http://tlvmvnrepository.tlv.lpnet.com/artifactory/api/pypi/lp-pypi-virtual/simple/resilience_ansible/\' --trusted-host tlvmvnrepository.tlv.lpnet.com
 
-echo "template file : '''+template_file+'''"
-python3 generate_feature_file.py $SERVICE_NAME '''+template_file+'''
+echo "template file : ''' + template_file + '''"
+python3 generate_feature_file.py $SERVICE_NAME ''' + template_file + '''
 
 FEATURE_NAME=$(echo $JOB_NAME | awk -F "BDD_Resilience_" \'{print $2}\')
 
@@ -137,7 +130,7 @@ else
   SCORING_PATH="lp_rely_scoring_compare_scenario_all_metrics_a_b_c"
 fi
 
-SCORING_URL_PARAMS="start_ts=$TS_START&end_ts=$TS_END&a_start_ts='''+A_START+'''&a_end_ts='''+A_END+'''"
+SCORING_URL_PARAMS="start_ts=$TS_START&end_ts=$TS_END&a_start_ts=''' + A_START + '''&a_end_ts=''' + A_END + '''"
 
 echo "scoring for $SERVICE_NAME for metric name: $SCORING_PATH with SCORING_URL_PARAMS: $SCORING_URL_PARAMS"
 
@@ -181,12 +174,12 @@ fi
 '''
 }
 
-def runBehaveBDD(scenario,A_START,A_END){
+def runBehaveBDD(scenario, A_START, A_END) {
     sh '''set -x
 echo "set up variable for the shell"
-    graphite="'''+graphite+'''"
-    scenario="'''+scenario+'''"
-    duration="'''+duration+'''"
+    graphite="''' + graphite + '''"
+    scenario="''' + scenario + '''"
+    duration="''' + duration + '''"
 
 
     pip3 install -r requirements.txt --no-index --find-links 'http://tlvmvnrepository.tlv.lpnet.com/artifactory/api/pypi/lp-pypi-virtual/simple/resilience_ansible/' --trusted-host tlvmvnrepository.tlv.lpnet.com
@@ -201,7 +194,7 @@ echo "file path by env : $FILE_PATH_BY_ENV"
 
 
 
-case "'''+scenario+'''" in
+case "''' + scenario + '''" in
    "All scenarios")
       behave -i $FILE_PATH_BY_ENV -D duration=${duration} -D graphite=${graphite} -f allure_behave.formatter:AllureFormatter -o $allure_report --no-capture --color
       ;;
@@ -217,4 +210,4 @@ case "'''+scenario+'''" in
 esac
 '''
 
- }
+}
