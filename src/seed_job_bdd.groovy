@@ -68,7 +68,7 @@ def createPipeline(service) {
         }
         
          triggers {
-        cron('H */4 * * 1-5')
+        cron('H 20 * * *')
     }
     }
 }
