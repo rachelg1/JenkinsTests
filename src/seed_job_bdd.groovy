@@ -67,7 +67,7 @@ def createPipeline(service) {
             booleanParam('graphite', true, 'send graphite events during test.groovy')
         }
 
-        if (service.daily_build.enable == true)
+        if (service.daily_build != null && service.daily_build.enable == true)
             triggers {
                 cron('H ' + service.daily_build.time + ' * * *')
             }
