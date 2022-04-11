@@ -69,7 +69,9 @@ def createPipeline(service) {
 
         if (service.daily_build != null && service.daily_build.enable == true)
             triggers {
-                cron('H ' + service.daily_build.time + ' * * *')
+                cron {
+                    spec('H ' + service.daily_build.time + ' * * *')
+                }
             }
     }
 }
