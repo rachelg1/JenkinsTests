@@ -20,10 +20,7 @@ InputJSON.projects.each {
 }
 //finally - add to view
 addToView()
-ScriptApproval scriptApproval = ScriptApproval.get()
-scriptApproval.pendingScripts.each {
-    scriptApproval.approveScript(it.hash)
-}
+approve()
 
 def addToView() {
     listView('ABC_TEST') {
@@ -42,6 +39,19 @@ def addToView() {
             lastDuration()
             buildButton()
         }
+    }
+}
+
+def approve(){
+    ScriptApproval scriptApproval = ScriptApproval.get() 
+    def hashesToApprove = [] 
+    scriptApproval.pendingScripts.each { 	
+        if (it.script.contains("Some text")) { 		
+            hashesToApprove.add(it.hash) 	
+        } 
+    } 
+    for (String hash : hashesToApprove) { 	
+        scriptApproval.approveScript(hash) 
     }
 }
 
