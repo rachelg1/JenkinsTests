@@ -20,7 +20,7 @@ InputJSON.projects.each {
 }
 //finally - add to view
 addToView()
-approve()
+//approve()
 
 def addToView() {
     listView('ABC_TEST') {
