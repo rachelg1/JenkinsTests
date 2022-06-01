@@ -8,12 +8,13 @@ def InputJSON = new JsonSlurper().parseText(config_file);
 
 InputJSON.projects.each {
     createPipeline(it)
+    return true
 }
 
 def createPipeline(service) {
-def newJobName = "${service.service_name}_test"
+    def newJobName = "${service.service_name}_test"
 
-    
+
     pipelineJob(newJobName) {
 
         definition {
