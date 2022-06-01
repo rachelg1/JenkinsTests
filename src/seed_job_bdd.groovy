@@ -18,42 +18,6 @@ InputJSON.projects.each {
     }
     return true
 }
-//finally - add to view
-addToView()
-//approve()
-
-def addToView() {
-    listView('ABC_TEST') {
-        description('All feature files bdd resilience jobs ')
-        filterBuildQueue()
-        filterExecutors()
-        jobs {
-            regex('.*bdd_resilience.*')
-        }
-        columns {
-            status()
-            weather()
-            name()
-            lastSuccess()
-            lastFailure()
-            lastDuration()
-            buildButton()
-        }
-    }
-}
-
-def approve(){
-    ScriptApproval scriptApproval = ScriptApproval.get() 
-    def hashesToApprove = [] 
-    scriptApproval.pendingScripts.each { 	
-        if (it.script.contains("Some text")) { 		
-            hashesToApprove.add(it.hash) 	
-        } 
-    } 
-    for (String hash : hashesToApprove) { 	
-        scriptApproval.approveScript(hash) 
-    }
-}
 
 def createPipeline(service) {
 
@@ -65,7 +29,49 @@ def createPipeline(service) {
 
         definition {
             cps {
-                script(readFileFromWorkspace('src/main_pipeline.groovy'))
+                script(
+                node (){
+    def currentStage = "";
+    def String[] scenarios_arr
+    def failed_scenarios = []
+    scenarios_arr = "s1,s2,s3".split(',')
+    scenarios_arr.each { entry ->
+
+        //catchError(message: "scenario : $entry - failed", buildResult: 'FAILURE', stageResult: 'FAILURE') {
+        stage(entry) {
+            try {
+                echo "$entry"
+                currentStage = entry
+                if (entry == "s2")
+                    throw new Exception("hello")
+            }
+            //}
+            catch (e) {
+                echo 'scenario : ' + entry + ' - failed: ' + e
+                failed_scenarios.add(entry)
+                // Since we're catching the exception in order to report on it,
+                // we need to re-throw it, to ensure that the build is marked as failed
+                //throw e
+            }
+        }
+
+    }
+
+    if (failed_scenarios.size() != 0) {
+        echo 'failed_scenarios: ' + "[\"${failed_scenarios.join('", "')}\"]"
+        currentBuild.result = 'FAILURE'
+    }
+
+}
+
+def runBehaveBDD(scenario, A_START, A_END) {
+    sh '''set -x
+echo "set up variable for the shell"
+    scenario="''' + scenario + '''"
+'''
+
+}
+                )
 
             }
         }
@@ -78,15 +84,6 @@ def createPipeline(service) {
             booleanParam('graphite', true, 'send graphite events during test.groovy')
         }
 
-        if (service.daily_build != null && service.daily_build.enable == true)
-            properties {
-                pipelineTriggers {
-                    triggers {
-                        cron {
-                            spec('H ' + service.daily_build.time + ' * * *')
-                        }
-                    }
-                }
-            }
+
     }
 }
