@@ -7,10 +7,7 @@ String config_file = readFileFromWorkspace("src/projects.json")
 def InputJSON = new JsonSlurper().parseText(config_file);
 
 InputJSON.projects.each {
-    if (it.group != null && it.service_name != null && it.enable == true) {
-        createPipeline(it)
-    }
-    return true
+    createPipeline(it)
 }
 
 def createPipeline(service) {
