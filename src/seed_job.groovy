@@ -26,7 +26,7 @@ def newJobName = "${service.service_name}_test"
             wHideParameterDefinition {
                 name("SERVICE_DETAILS")
                 description("service details")
-                defaultValue(service)
+                defaultValue(service.toString)
             }
         }
     }
