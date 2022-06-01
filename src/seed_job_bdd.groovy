@@ -18,6 +18,42 @@ InputJSON.projects.each {
     }
     return true
 }
+//finally - add to view
+addToView()
+//approve()
+
+def addToView() {
+    listView('ABC_TEST') {
+        description('All feature files bdd resilience jobs ')
+        filterBuildQueue()
+        filterExecutors()
+        jobs {
+            regex('.*bdd_resilience.*')
+        }
+        columns {
+            status()
+            weather()
+            name()
+            lastSuccess()
+            lastFailure()
+            lastDuration()
+            buildButton()
+        }
+    }
+}
+
+def approve(){
+    ScriptApproval scriptApproval = ScriptApproval.get()
+    def hashesToApprove = []
+    scriptApproval.pendingScripts.each {
+        if (it.script.contains("Some text")) {
+            hashesToApprove.add(it.hash)
+        }
+    }
+    for (String hash : hashesToApprove) {
+        scriptApproval.approveScript(hash)
+    }
+}
 
 def createPipeline(service) {
 
@@ -29,17 +65,7 @@ def createPipeline(service) {
 
         definition {
             cps {
-                script(
-                "node() {
-
-    stage(\'critical_dependencies\') {
-        Integer A_END = System.currentTimeMillis()/1000
-        def A_START = A_END - (3 * 60)
-        println(A_END)
-        println(A_START)
-        }
-}"
-                )
+                script(readFileFromWorkspace('src/main_pipeline.groovy'))
 
             }
         }
@@ -52,6 +78,15 @@ def createPipeline(service) {
             booleanParam('graphite', true, 'send graphite events during test.groovy')
         }
 
-
+        if (service.daily_build != null && service.daily_build.enable == true)
+            properties {
+                pipelineTriggers {
+                    triggers {
+                        cron {
+                            spec('H ' + service.daily_build.time + ' * * *')
+                        }
+                    }
+                }
+            }
     }
 }
