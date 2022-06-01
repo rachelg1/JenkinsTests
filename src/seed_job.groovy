@@ -30,7 +30,11 @@ def createPipeline(service) {
         }
 
         parameters {
-            stringParam("wait_for_scoring", "1", "wait time before scoring path")
+            wHideParameterDefinition {
+                name("SERVICE_NAME")
+                description("service name")
+                defaultValue(service.service_name)
+            }
         }
 
     }
