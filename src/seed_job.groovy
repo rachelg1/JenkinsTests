@@ -1,34 +1,37 @@
 import hudson.model.*
 import hudson.security.*
 import groovy.json.JsonSlurper
+import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval
 
-String config_file = readFileFromWorkspace("src/projects.json")
 
-def InputJSON = new JsonSlurper().parseText(config_file);
+String projects_file = readFileFromWorkspace("src/projects.json")
+
+def InputJSON = new JsonSlurper().parseText(projects_file)
 
 InputJSON.projects.each {
-    createPipeline(it)
+
+        createPipeline(it)
     return true
 }
 
 def createPipeline(service) {
-    def newJobName = "${service.service_name}_test"
 
+    def newJobName = "${service.service_name}_test"
 
     pipelineJob(newJobName) {
 
+        description("new job haha")
+
         definition {
             cps {
-                script(readFileFromWorkspace('src/pipeline.groovy'))
+                script(readFileFromWorkspace('src/main_pipeline.groovy'))
+
             }
         }
 
         parameters {
-            wHideParameterDefinition {
-                name("SERVICE_DETAILS")
-                description("service details")
-                defaultValue(service.service_name)
-            }
+            stringParam("wait_for_scoring", "1", "wait time before scoring path")
         }
+
     }
 }
