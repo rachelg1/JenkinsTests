@@ -11,16 +11,9 @@ InputJSON.projects.each {
 }
 
 def createPipeline(service) {
+def newJobName = "${service.service_name}_test"
 
-    def addr = "https://toga.int.liveperson.net/api/groups/${service.group}"
-    def conn = addr.toURL().openConnection()
-    def feed = conn.content.text
-    def results = new JsonSlurper().parseText(feed.toString())
-
-    def newJobName = "NFT_${service.service_name}_critical_pipeline"
-    if (!service.in_container_user?.trim()) {
-        service.in_container_user = "root"
-    }
+    
     pipelineJob(newJobName) {
 
         definition {
