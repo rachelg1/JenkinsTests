@@ -1,1 +1,1 @@
-print 'script_2'
+print ("script_2")
