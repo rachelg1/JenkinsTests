@@ -1,3 +1,7 @@
 pipeline {
-  python pythonScript.py
+stages{
+stage('1'){
+python pythonScript.py
+} 
+}
 }
