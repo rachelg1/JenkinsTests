@@ -2,7 +2,9 @@ pipeline {
   agent any
   stages{
     stage('1'){
-      python pythonScript.py
+      steps{
+        python pythonScript.py
+      }
     } 
   }
 }
